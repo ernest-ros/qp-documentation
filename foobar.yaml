@@ -1,0 +1,447 @@
+openapi: 3.0.1
+info:
+  title: Test Web API
+  description: "# Foobar\r\n\r\nFoobar is a Python library for dealing with word pluralization.\r\n\r\n## Installation\r\n\r\nUse the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.\r\n\r\n```bash\r\npip install foobar\r\n```\r\n\r\n## Usage\r\n\r\n```python\r\nimport foobar\r\n\r\n# returns 'words'\r\nfoobar.pluralize('word')\r\n\r\n# returns 'geese'\r\nfoobar.pluralize('goose')\r\n\r\n# returns 'phenomenon'\r\nfoobar.singularize('phenomena')\r\n```\r\n\r\n## Contributing\r\nPull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.\r\n\r\nPlease make sure to update tests as appropriate.\r\n\r\n## License\r\n[MIT](https://choosealicense.com/licenses/mit/)"
+  contact:
+    name: John Smith
+    email: johnsmith@mailinator.com
+  license:
+    name: Use under LICX
+    url: https://example.com/license
+  version: v1
+paths:
+  /accounts/{account_id}:
+    get:
+      tags:
+        - Accounts
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            title: Guid
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/WebApiDocumentation.Accounts.Models.Account
+  /accounts:
+    post:
+      tags:
+        - Accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebApiDocumentation.Accounts.Models.Account'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/WebApiDocumentation.Accounts.Models.Account
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Error'
+        '500':
+          description: Server Error
+  /creditcard:
+    post:
+      tags:
+        - CreditCard
+      summary: Charge
+      description: >-
+        Charge transactions are immediately processed and marked for
+        settlement.  Please consult your account manager for settlement time
+        details.
+      requestBody:
+        description: Charge object
+        content:
+          application/json:
+            schema:
+              $ref: >-
+                #/components/schemas/WebApiDocumentation.CreditCard.Models.Charge
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/WebApiDocumentation.Models.Payments.Response
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                title: List`1
+                type: array
+                items:
+                  $ref: >-
+                    #/components/schemas/WebApiDocumentation.Models.Payments.Error
+components:
+  schemas:
+    WebApiDocumentation.Accounts.Models.Account:
+      title: Account
+      type: object
+      properties:
+        company_name:
+          title: String
+          type: string
+          description: The account holder's company name.
+          nullable: true
+          example: My Company Name
+        email:
+          title: String
+          type: string
+          description: The account holder's email address.
+          nullable: true
+          example: johnsmith@mycompanyname.com
+        first_name:
+          title: String
+          type: string
+          description: The account holder's first name.
+          nullable: true
+          example: John
+        last_name:
+          title: String
+          type: string
+          description: The account holder's last name.
+          nullable: true
+          example: Smith
+        mobile_phone_number:
+          title: String
+          type: string
+          description: The account holder's mobile phone number.
+          nullable: true
+          example: '8881239876'
+        phone_number:
+          title: String
+          type: string
+          description: The account holder's primary phone number.
+          nullable: true
+          example: '8889871234'
+        created_by:
+          title: String
+          type: string
+          description: The user that created the account.
+          nullable: true
+          readOnly: true
+          example: iamauser@mycompanyemail.com
+      additionalProperties: false
+    WebApiDocumentation.CreditCard.Models.Charge:
+      title: Charge
+      required:
+        - amounts
+        - reference_number
+      type: object
+      properties:
+        method:
+          title: String
+          type: string
+          nullable: true
+          readOnly: true
+        reference_number:
+          title: String
+          maxLength: 50
+          minLength: 6
+          type: string
+          description: 'TODO: tranaction.reference_number'
+        amounts:
+          $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Amounts'
+        currency:
+          title: String
+          type: string
+          description: 'TODO: charge.currency'
+          nullable: true
+        payment:
+          $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Payment'
+        shipping:
+          title: List`1
+          type: array
+          items:
+            $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Shipping'
+          description: 'TODO: charge.shipping'
+          nullable: true
+      additionalProperties: false
+    WebApiDocumentation.Models.Payments.Account:
+      title: Account
+      type: object
+      properties:
+        card_verification_code:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        expire_month:
+          title: Nullable`1
+          type: integer
+          description: 'TODO: summary'
+          format: int32
+          nullable: true
+        expire_year:
+          title: Nullable`1
+          type: integer
+          description: 'TODO: summary'
+          format: int32
+          nullable: true
+        number:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+      additionalProperties: false
+    WebApiDocumentation.Models.Payments.Address:
+      title: Address
+      type: object
+      properties:
+        city:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        country:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        state:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        street_1:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        zip_code:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+      additionalProperties: false
+    WebApiDocumentation.Models.Payments.Amounts:
+      title: Amounts
+      required:
+        - total
+      type: object
+      properties:
+        shipping:
+          title: Nullable`1
+          type: number
+          description: 'TODO: amounts.shipping'
+          format: double
+          nullable: true
+        sub_total:
+          title: Nullable`1
+          type: number
+          description: 'TODO: amounts.sub_total'
+          format: double
+          nullable: true
+        surcharge:
+          title: Nullable`1
+          type: number
+          description: 'TODO: amounts.surcharge'
+          format: double
+          nullable: true
+        tax:
+          title: Nullable`1
+          type: number
+          description: 'TODO: amounts.tax'
+          format: double
+          nullable: true
+        tip:
+          title: Nullable`1
+          type: number
+          description: 'TODO: amounts.tip'
+          format: double
+          nullable: true
+        total:
+          title: Decimal
+          type: number
+          description: 'TODO: amounts.total'
+          format: double
+      additionalProperties: false
+      description: 'TODO: amounts'
+    WebApiDocumentation.Models.Payments.Error:
+      title: Error
+      type: object
+      properties:
+        code:
+          title: String
+          type: string
+          nullable: true
+        message:
+          title: String
+          type: string
+          nullable: true
+        description:
+          title: String
+          type: string
+          nullable: true
+      additionalProperties: false
+    WebApiDocumentation.Models.Payments.Payment:
+      title: Payment
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Address'
+        account:
+          $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Account'
+        email:
+          title: String
+          type: string
+          description: 'TODO: payment.email'
+          nullable: true
+        name:
+          title: String
+          type: string
+          description: 'TODO: payment.name'
+          nullable: true
+        phone:
+          title: String
+          type: string
+          description: 'TODO: payment.phone'
+          nullable: true
+        source_ip_address:
+          title: String
+          type: string
+          description: 'TODO: payment.source_ip_address'
+          nullable: true
+      additionalProperties: false
+      description: 'TODO: payment'
+    WebApiDocumentation.Models.Payments.Provider:
+      title: Provider
+      type: object
+      properties:
+        avs:
+          $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Result'
+        authorization_code:
+          title: String
+          type: string
+          nullable: true
+        cvv:
+          $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Result'
+        code:
+          title: String
+          type: string
+          nullable: true
+        message:
+          title: String
+          type: string
+          nullable: true
+      additionalProperties: false
+    WebApiDocumentation.Models.Payments.Response:
+      title: Response
+      type: object
+      properties:
+        code:
+          title: Int32
+          type: integer
+          format: int32
+        datetime:
+          title: DateTimeOffset
+          type: string
+          format: date-time
+        message:
+          title: String
+          type: string
+          nullable: true
+        reference_number:
+          title: String
+          type: string
+          nullable: true
+        payment_type:
+          title: String
+          type: string
+          nullable: true
+        transaction_type:
+          title: String
+          type: string
+          nullable: true
+        provider:
+          $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Provider'
+        transaction_id:
+          title: Nullable`1
+          type: integer
+          format: int64
+          nullable: true
+      additionalProperties: false
+    WebApiDocumentation.Models.Payments.Result:
+      title: Result
+      type: object
+      properties:
+        code:
+          title: String
+          type: string
+          nullable: true
+        message:
+          title: String
+          type: string
+          nullable: true
+      additionalProperties: false
+    WebApiDocumentation.Models.Payments.Shipping:
+      title: Shipping
+      type: object
+      properties:
+        attention:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        address:
+          $ref: '#/components/schemas/WebApiDocumentation.Models.Payments.Address'
+        name:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        provider_name:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        date_shipped:
+          title: Nullable`1
+          type: string
+          description: 'TODO: summary'
+          format: date-time
+          nullable: true
+        date_delivery_estimate:
+          title: Nullable`1
+          type: string
+          description: 'TODO: summary'
+          format: date-time
+          nullable: true
+        remarks:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        tracking_number:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+        type:
+          title: String
+          type: string
+          description: 'TODO: summary'
+          nullable: true
+      additionalProperties: false
+tags:
+  - name: Accounts
+    description: 'TODO: credit card summary'
+  - name: CreditCard
+    description: 'TODO: credit card summary'
