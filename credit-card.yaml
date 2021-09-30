@@ -1,0 +1,871 @@
+openapi: 3.0.1
+info:
+  title: Payments API
+  description: Payments API
+  contact:
+    name: John Smith
+    url: 'https://www.quantumelectronicpayments.com'
+    email: johnsmith@quantumepay.com
+  version: v1
+paths:
+  /creditcard/charge:
+    post:
+      tags:
+        - CreditCard
+      summary: Charge
+      description: "The Charge action immediately submits the payment for authorization and upon approval it is automatically marked for settlement. \r\n            The payment is settled during the merchant's next batch settlement run."
+      requestBody:
+        description: object (Charge)
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Charge'
+              description: 'TODO: Charge'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargeCommandResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
+  '/creditcard/{transaction_id}/capture':
+    post:
+      tags:
+        - CreditCard
+      summary: Capture
+      description: "The Capture action marks an <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Authorization Only</a> transaction for settlement. The transaction is settled during the merchant's next batch settlement run.\r\n            The settlement amount can be adjusted up to the original authorized amount that was approved, however the transaction can only be captured once.  \r\n            Only <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Authorization Only</a> transactions can be captured."
+      parameters:
+        - name: transaction_id
+          in: path
+          description: "The identifier of the transaction to be captured. The **transaction_id**\r\n            was returned on an approved <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Charge</a> or <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Authorization Only</a> action."
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: object (Capture)
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Capture'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptureCommandResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
+  '/creditcard/{transaction_id}/refund':
+    post:
+      tags:
+        - CreditCard
+      summary: Refund
+      description: "The Refund action immediately submits the refund transaction for authorization and upon approval it is automatically marked for settlement. The refund\r\n            transaction is settled during the merchant's next batch settlement run.\r\n            <br> <br> \r\n            The refund amount can be adjusted up to the original authorized amount that was approved. A transaction can be refunded multiple times as long as the sum of the total\r\n            refund amounts settled plus the total of pending refund transaction amounts does not exceed the original authorized amount.\r\n            <br> <br> \r\n            Only <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Charge</a> and <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Authorization Only</a>\r\n            transactions that have been settled can be refunded.  If the transaction is pending settlement or has not settled, see the <a href=\"#tag/CreditCard/paths/~1creditcard~1{transaction_id}~1cancel/post\">Cancel</a> action.\r\n            <br> <br> <span>```NOTE - American Express does not support purchase return authorization.```</span>"
+      parameters:
+        - name: transaction_id
+          in: path
+          description: "The identifier of the transaction to be refunded. The **transaction_id**\r\n            was returned on an approved <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Charge</a> or <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Authorization Only</a> transaction."
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: object (Refund)
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Refund'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundCommandResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
+  '/creditcard/{transaction_id}/cancel':
+    post:
+      tags:
+        - CreditCard
+      summary: Cancel
+      description: "The Cancel action cancels the most recent pending action of the transaction as long it has not settled.  In other words, transactions\r\n            in pending state can be canceled."
+      parameters:
+        - name: transaction_id
+          in: path
+          description: "The identifier of the transaction to be canceled. The **transaction_id**\r\n            was returned on an approved <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Charge</a> or <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Authorization Only</a> action."
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: object (Cancel)
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Cancel'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelCommandResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
+  '/creditcard/{transaction_id}':
+    get:
+      tags:
+        - CreditCard
+      summary: Find Transaction by ID
+      description: Get customer details.
+      parameters:
+        - name: transaction_id
+          in: path
+          description: "The identifier of the transaction to find. The **transaction_id**\r\n            was returned on an approved <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Charge</a> or <a href=\"#tag/CreditCard/paths/~1creditcard~1charge/post\">Authorization Only</a> transaction."
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseBase'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
+components:
+  schemas:
+    Account:
+      required:
+        - card_security_code
+        - expiration_month
+        - expiration_year
+        - number
+      type: object
+      properties:
+        name_on_account:
+          maxLength: 32
+          type: string
+          description: >-
+            The name on the account as it appears on the cardholder's billing
+            statement.
+          nullable: true
+          example: John Smith
+        card_security_code:
+          maxLength: 4
+          minLength: 3
+          type: string
+          description: "The 3 or 4 digit card security code associated with the account number. For Discover, Mastercard and Visa it is sometimes referred to as CVV, \r\nCVV2, CSC or CVC having a length of 3 numeric digits. For American Express it is called Card Identification Number (CID) having a length of \r\n4 numeric digits."
+          example: '999'
+        expiration_month:
+          maximum: 12
+          minimum: 1
+          type: integer
+          description: The expiration month assoicated with the account number.
+          format: int32
+          example: 9
+        expiration_year:
+          maximum: 99
+          minimum: 21
+          type: integer
+          description: The expiration year assoicated with the account number.
+          format: int32
+          example: 26
+        number:
+          minLength: 1
+          type: string
+          description: The account number that will be used to make the payment.
+          example: '4012000098765439'
+      additionalProperties: false
+    Amounts:
+      required:
+        - total
+      type: object
+      properties:
+        sub_total:
+          minimum: 0
+          type: number
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: NNNNNNNNNN.nn</span>\r\n<br> \r\n            The sub total amount associated with the payment. It is the sum of a category or subgroup, usually before any discounts or adjustments \r\n            are applied. This amount is for tracking/informational purpose only and is typically inlcuded in the <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">total</span> amount."
+          format: double
+          nullable: true
+          example: 32.26
+        discount:
+          minimum: 0
+          type: number
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: NNNNNNNNNN.nn</span>\r\n<br> \r\n            The discount amount associated with the payment. This amount is for tracking/informational purpose only and is typically deducted or no\r\n            included in the <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">total</span> amount."
+          format: double
+          nullable: true
+          example: 4.84
+        sales_tax:
+          minimum: 0
+          type: number
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: NNNNNNNNNN.nn</span>\r\n<br> \r\n            The sales tax amount associated with the payment. This amount is for tracking/informational purpose only and is typically inlcuded in the\r\n            <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">total</span> amount."
+          format: double
+          nullable: true
+          example: 1.99
+        total:
+          minimum: 0
+          type: number
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: NNNNNNNNNN.nn</span>\r\n<br> \r\n            The total amount assoicated with the payment. It is the sum of all applicable amounts minus any discount/adjustment amount. The cardholder's\r\n            account will be authorized/charged (debited) for this amount."
+          format: double
+          example: 29.41
+      additionalProperties: false
+      description: The amounts assoicated with the payment.
+    BillingAddress:
+      type: object
+      properties:
+        address_1:
+          maxLength: 64
+          type: string
+          description: "<span>```conditional - Profile Settings```</span>\r\n<br> \r\n            The street address 1 associated with the account. It is recommended that addresses with suite/apartment numbers be included in this\r\n            field when possible. When including the suite/apartment numbers exceeds the maximum length of this field, use the <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">address_2</span>\r\n            field for the suite/apartment numbers. If provided, this field along with <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">postal_code</span> \r\n            will be used for address verification."
+          nullable: true
+          example: 221 Main Street
+        address_2:
+          maxLength: 16
+          type: string
+          description: "The street address 2 associated with the account. Typically, this field is used for suite/apartment numbers. When including the suite/apartment\r\nnumbers exceeds the maximum length of <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">address_1</span> use this field for the suite/apartment numbers."
+          nullable: true
+          example: 'APT#G101'
+        city:
+          maxLength: 32
+          type: string
+          description: The city associated with the account.
+          nullable: true
+          example: Los Angeles
+        state:
+          allOf:
+            - $ref: '#/components/schemas/StateCode'
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: 2-letter alphabetic US state code - see <a href=\"https://en.wikipedia.org/wiki/ISO_3166-2:US\" target=\"_blank\">ISO 3166-2:US</a></span>\r\n<br> \r\n            The state associated with the account."
+          example: CA
+        postal_code:
+          type: string
+          description: "<span>```conditional - Profile Settings```</span>\r\n<br> \r\n<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: NNNNN or NNNNNnnnn - Integer (no special characters ie: period, parentheses, hyphens, space, etc...)</span>\r\n<br> \r\n            The postal code associated with the account. If provided, this field along with <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">address_1</span> \r\n            will be used for address verification."
+          nullable: true
+          example: '90029'
+        country_code:
+          allOf:
+            - $ref: '#/components/schemas/CountryCode'
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: 3-letter alphabetic country code - see <a href=\"https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes\" target=\"_blank\">ISO 3166-1</a></span>\r\n<br> \r\n            The country code associated with the account."
+          example: USA
+      additionalProperties: false
+    Cancel:
+      required:
+        - reference_id
+        - user_id
+      type: object
+      properties:
+        reference_id:
+          minLength: 1
+          type: string
+          description: >-
+            This field is used to identify the payment in the merchant's system.
+            The value should be unique, however uniqueness will not be enforced.
+          example: 'PO#44556789'
+        source_ip_address:
+          maxLength: 64
+          type: string
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: see <a href=\"https://en.wikipedia.org/wiki/IPv4\" target=\"_blank\">IPv4</a> and <a href=\"https://en.wikipedia.org/wiki/IPv6_address\" target=\"_blank\">IPv6</a></span>\r\n<br> \r\n            The source ip address where the transaction originated from (if applicable)."
+          nullable: true
+          example: 17.172.224.47
+        user_id:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: The user that canceled the transaction.
+          example: user@abcmerchant.com
+      additionalProperties: false
+    CancelCommandResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        datetime:
+          type: string
+          format: date-time
+        transaction_id:
+          type: string
+          nullable: true
+        reference_id:
+          type: string
+          nullable: true
+        action:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'TODO: CancelCommandResponse'
+    Capture:
+      required:
+        - reference_id
+        - user_id
+      type: object
+      properties:
+        reference_id:
+          minLength: 1
+          type: string
+          description: >-
+            This field is used to identify the payment in the merchant's system.
+            The value should be unique, however uniqueness will not be enforced.
+          example: 'PO#44556789'
+        amount:
+          minimum: 0
+          type: number
+          description: "The final settlement amount of the transaction. If the value is $0.00 or if the amount was not provided, the settlement amount defaults to\r\nthe original authorized amount that was approved."
+          format: double
+          nullable: true
+        source_ip_address:
+          maxLength: 64
+          type: string
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: see <a href=\"https://en.wikipedia.org/wiki/IPv4\" target=\"_blank\">IPv4</a> and <a href=\"https://en.wikipedia.org/wiki/IPv6_address\" target=\"_blank\">IPv6</a></span>\r\n<br> \r\n            The source ip address where the transaction originated from (if applicable)."
+          nullable: true
+          example: 17.172.224.47
+        user_id:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: The user that marked the transaction for settlement.
+          example: user@abcmerchant.com
+      additionalProperties: false
+    CaptureCommandResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        datetime:
+          type: string
+          format: date-time
+        transaction_id:
+          type: string
+          nullable: true
+        reference_id:
+          type: string
+          nullable: true
+        action:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'TODO: CaptureCommandResponse'
+    Charge:
+      required:
+        - amounts
+        - authorization_only
+        - currency
+        - payment
+        - reference_id
+        - user_id
+      type: object
+      properties:
+        authorization_only:
+          type: boolean
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Default: false</span>\r\n<br> \r\n            When this field is set to **true**, the transaction is immediately submitted for authorization however, it is not marked for settlement. \r\n            Authorization Only transactions must be marked for settlement by calling the <a href=\"#tag/CreditCard/paths/~1creditcard~1{transaction_id}~1capture/post\">Capture</a> \r\n            action."
+        reference_id:
+          maxLength: 36
+          minLength: 1
+          type: string
+          description: >-
+            This field is used to identify the payment in the merchant's system.
+            The value should be unique, however uniqueness will not be enforced.
+          example: 'PO#44556789'
+        amounts:
+          allOf:
+            - $ref: '#/components/schemas/Amounts'
+          description: The amounts assoicated with the payment.
+        payment:
+          allOf:
+            - $ref: '#/components/schemas/Payment'
+          description: The account details associated with the payment.
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/CurrencyCode'
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Default: USD (United States Dollar)</span>\r\n<br> \r\n<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: 3-letter alphabetic currency code - see <a href=\"https://en.wikipedia.org/wiki/ISO_4217\" target=\"_blank\">ISO 4217</a></span>\r\n<br> \r\n            The currency code associated with the payment. The payment will be authorized and settled based on the currency code."
+          example: USD
+        shipping:
+          allOf:
+            - $ref: '#/components/schemas/Shipping'
+          description: The shipping details associated with the payment.
+          nullable: true
+        source_ip_address:
+          maxLength: 64
+          type: string
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: see <a href=\"https://en.wikipedia.org/wiki/IPv4\" target=\"_blank\">IPv4</a> and <a href=\"https://en.wikipedia.org/wiki/IPv6_address\" target=\"_blank\">IPv6</a></span>\r\n<br> \r\n            The source ip address where the payment originated from (if applicable)."
+          nullable: true
+          example: 17.172.224.47
+        custom_fields:
+          type: object
+          additionalProperties:
+            type: string
+          description: An array of custom key/value pairs defined by the client/merchant.
+          nullable: true
+        user_id:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: The user that processed the payment.
+          example: user@abcmerchant.com
+      additionalProperties: false
+      description: 'TODO: Charge'
+    ChargeCommandResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        datetime:
+          type: string
+          format: date-time
+        transaction_id:
+          type: string
+          nullable: true
+        reference_id:
+          type: string
+          nullable: true
+        action:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        provider:
+          allOf:
+            - $ref: '#/components/schemas/Provider'
+          nullable: true
+      additionalProperties: false
+      description: 'TODO: ChargeCommandResponse'
+    CountryCode:
+      enum:
+        - USA
+      type: string
+      description: >-
+        <p>Members:</p><ul></ul><p>Members:</p><ul><li>USA - United States of
+        America</ul><p>Members:</p><ul></ul>
+    CurrencyCode:
+      enum:
+        - USD
+      type: string
+      description: >-
+        <p>Members:</p><ul></ul><p>Members:</p><ul><li>USD - United States
+        Dollar</ul><p>Members:</p><ul></ul>
+    Error:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          minLength: 1
+          type: string
+        message:
+          minLength: 1
+          type: string
+      additionalProperties: false
+      description: 'TODO: summary Error'
+    Outcome:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+      additionalProperties: false
+    Payment:
+      required:
+        - account
+        - email
+      type: object
+      properties:
+        account:
+          allOf:
+            - $ref: '#/components/schemas/Account'
+          description: The account details that will be used to make the payment.
+        billing_address:
+          allOf:
+            - $ref: '#/components/schemas/BillingAddress'
+          description: "<span>```conditional - Profile Settings```</span>\r\n<br> \r\n            The billing address associated with the account."
+          nullable: true
+        email:
+          maxLength: 255
+          minLength: 6
+          type: string
+          description: "The email address where notifications will be sent (ie: payment receipt). Typically, this would be the cardholder's email address, however \r\nit can be the email address of the person making the payment on behalf of the cardholder."
+          format: email
+          example: johnsmith@companynamellc.com
+        name:
+          maxLength: 32
+          type: string
+          description: >-
+            Typically, this would be the cardholder's name, however it can be
+            the name of the person making the payment on behalf of the
+            cardholder.
+          nullable: true
+          example: John Smith
+        phone_number:
+          maxLength: 10
+          minLength: 10
+          type: string
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: NNNNNNNNNN - Integer (no special characters ie: period, parentheses, hyphens, space, etc...)</span>\r\n<br> \r\n            Typically, this would be the cardholder's phone number, however it can be the phone number of the person making the payment on behalf of the cardholder."
+          nullable: true
+          example: '2134449876'
+      additionalProperties: false
+      description: The payment details that will be used to make the payment.
+    Provider:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        authorization_code:
+          type: string
+          nullable: true
+        avs:
+          allOf:
+            - $ref: '#/components/schemas/Outcome'
+          nullable: true
+        cvv:
+          allOf:
+            - $ref: '#/components/schemas/Outcome'
+          nullable: true
+      additionalProperties: false
+    Refund:
+      required:
+        - reference_id
+        - user_id
+      type: object
+      properties:
+        reference_id:
+          minLength: 1
+          type: string
+          description: >-
+            This field is used to identify the payment in the merchant's system.
+            The value should be unique, however uniqueness will not be enforced.
+          example: 'PO#44556789'
+        amount:
+          minimum: 0
+          type: number
+          description: "The amount to refund back to the cardholder's account. If the value is $0.00 or if the amount was not provided, the refund amount defaults to\r\nthe approved original authorized amount."
+          format: double
+          nullable: true
+        source_ip_address:
+          maxLength: 64
+          type: string
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: see <a href=\"https://en.wikipedia.org/wiki/IPv4\" target=\"_blank\">IPv4</a> and <a href=\"https://en.wikipedia.org/wiki/IPv6_address\" target=\"_blank\">IPv6</a></span>\r\n<br> \r\n            The source ip address where the transaction originated from (if applicable)."
+          nullable: true
+          example: 17.172.224.47
+        user_id:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: The user that initiated the refund.
+          example: user@abcmerchant.com
+      additionalProperties: false
+    RefundCommandResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        datetime:
+          type: string
+          format: date-time
+        transaction_id:
+          type: string
+          nullable: true
+        reference_id:
+          type: string
+          nullable: true
+        action:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'TODO: RefundCommandResponse'
+    ResponseBase:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        datetime:
+          type: string
+          format: date-time
+        transaction_id:
+          type: string
+          nullable: true
+        reference_id:
+          type: string
+          nullable: true
+        action:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+      additionalProperties: false
+    Result:
+      required:
+        - errors
+        - field
+      type: object
+      properties:
+        field:
+          minLength: 1
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      additionalProperties: false
+      description: 'TODO: summary Result'
+    Shipping:
+      required:
+        - address
+      type: object
+      properties:
+        tracking_number:
+          maxLength: 48
+          type: string
+          description: >-
+            A number assigned to the package when it has been shipped - the
+            tracking number is provided by the shipping company provider.
+          nullable: true
+          example: '9400100000000000000000'
+        carrier:
+          maxLength: 32
+          type: string
+          description: >-
+            The shipping carrier that will deliver the package to the
+            destination address.
+          nullable: true
+          example: USPS
+        date:
+          type: string
+          description: The date the package was shipped by the provider.
+          format: date-time
+          nullable: true
+        address:
+          allOf:
+            - $ref: '#/components/schemas/ShippingAddress'
+          description: The ship to address associated with the package.
+      additionalProperties: false
+      description: The shipping details associated with the payment.
+    ShippingAddress:
+      required:
+        - address_1
+        - city
+        - country_code
+        - name
+        - postal_code
+        - state
+      type: object
+      properties:
+        company_name:
+          maxLength: 32
+          type: string
+          description: >-
+            The company name of the shipping address where the package will be
+            sent.
+          nullable: true
+          example: Company Name LLC
+        name:
+          maxLength: 32
+          minLength: 1
+          type: string
+          description: The full name of the recipient.
+          example: John Smith
+        email:
+          maxLength: 255
+          type: string
+          description: The email address of the recipient.
+          format: email
+          nullable: true
+          example: johnsmith@companynamellc.com
+        phone_number:
+          maxLength: 10
+          minLength: 10
+          type: string
+          description: The phone number of the recipient.
+          nullable: true
+          example: '2134449876'
+        address_1:
+          maxLength: 64
+          minLength: 1
+          type: string
+          description: "The address 1 of the shipping address where the pakcage will be sent. It is recommended that addresses with suite/apartment numbers be included in this\r\nfield when possible. When including the suite/apartment numbers exceeds the maximum length of this field, use the <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">address_2</span>\r\nfield for the suite/apartment numbers."
+          example: 221 Main Street
+        address_2:
+          maxLength: 16
+          type: string
+          description: "The address 2 of the shipping address where the order will be sent to. Typically, this field is used for suite/apartment numbers. When including the suite/apartment\r\nnumbers exceeds the maximum length of <span class=\"sc-fzqzlV sc-fzonjX iwWBsD\">address_1</span> use this field for the suite/apartment numbers."
+          nullable: true
+          example: 'APT#G101'
+        city:
+          maxLength: 32
+          minLength: 1
+          type: string
+          description: The city of the shipping address where the order will be sent to.
+          example: Los Angeles
+        state:
+          allOf:
+            - $ref: '#/components/schemas/StateCode'
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: 2-letter alphabetic US state code - see <a href=\"https://en.wikipedia.org/wiki/ISO_3166-2:US\" target=\"_blank\">ISO 3166-2:US</a></span>\r\n<br> \r\n            The state of the shipping address where the order will be sent to."
+          example: CA
+        postal_code:
+          minLength: 1
+          type: string
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: NNNNN or NNNNNnnnn - Integer (no special characters ie: period, parentheses, hyphens, space, etc...)</span>\r\n<br> \r\n            The postal code  of the shipping address where the order will be sent to."
+          example: '90029'
+        country_code:
+          allOf:
+            - $ref: '#/components/schemas/CountryCode'
+          description: "<span class=\"sc-fzqzlV sc-fzoxnE dpLlWm\">Format: 3-letter alphabetic country code - see <a href=\"https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes\" target=\"_blank\">ISO 3166-1</a></span>\r\n<br> \r\n            The country code of the shipping address where the order will be sent to."
+          example: USA
+      additionalProperties: false
+    StateCode:
+      enum:
+        - AL
+        - AK
+        - AZ
+        - AR
+        - CA
+        - CO
+        - CT
+        - DE
+        - FL
+        - GA
+        - HI
+        - ID
+        - IL
+        - IN
+        - IA
+        - KS
+        - KY
+        - LA
+        - ME
+        - MD
+        - MA
+        - MI
+        - MN
+        - MS
+        - MO
+        - MT
+        - NE
+        - NV
+        - NH
+        - NJ
+        - NM
+        - NY
+        - NC
+        - ND
+        - OH
+        - OK
+        - OR
+        - PA
+        - RI
+        - SC
+        - SD
+        - TN
+        - TX
+        - UT
+        - VT
+        - VA
+        - WA
+        - WV
+        - WI
+        - WY
+        - DC
+        - AS
+        - GU
+        - MP
+        - PR
+        - UM
+        - VI
+      type: string
+      description: >-
+        <p>Members:</p><ul></ul><p>Members:</p><ul><li>AL - Alabama<li>AK -
+        Alaska<li>AZ - Arizona<li>AR - Arkansas<li>CA - California<li>CO -
+        Colorado<li>CT - Connecticut<li>DE - Delaware<li>FL - Florida<li>GA -
+        Georgia<li>HI - Hawaii<li>ID - Idaho<li>IL - Illinois<li>IN -
+        Indiana<li>IA - Iowa<li>KS - Kansas<li>KY - Kentucky<li>LA -
+        Louisiana<li>ME - Maine<li>MD - Maryland<li>MA - Massachusetts<li>MI -
+        Michigan<li>MN - Minnesota<li>MS - Mississippi<li>MO - Missouri<li>MT -
+        Montana<li>NE - Nebraska<li>NV - Nevada<li>NH - New Hampshire<li>NJ -
+        New Jersey<li>NM - New Mexico<li>NY - New York<li>NC - North
+        Carolina<li>ND - North Dakota<li>OH - Ohio<li>OK - Oklahoma<li>OR -
+        Oregon<li>PA - Pennsylvania<li>RI - Rhode Island<li>SC - South
+        Carolina<li>SD - South Dakota<li>TN - Tennessee<li>TX - Texas<li>UT -
+        Utah<li>VT - Vermont<li>VA - Virginia<li>WA - Washington<li>WV - West
+        Virginia<li>WI - Wisconsin<li>WY - Wyoming<li>DC - District of
+        Columbia<li>AS - American Samoa<li>GU - Guam<li>MP - Northern Mariana
+        Islands<li>PR - Puerto Rico<li>UM - United States Minor<li>VI - U.S.
+        Virgin Islands</ul><p>Members:</p><ul></ul>
+tags:
+  - name: CreditCard
+    description: The Credit Card service provides a simple an easy API to accept payments.
